@@ -7,11 +7,14 @@ import './globals.css';
 
 import { Layout } from '@components';
 
+import { useNextTranslation } from '@lib/hooks';
+import { cn } from '@lib/utils';
+
 const inter = Inter({ subsets: ['latin'] });
 
 export async function generateMetadata(): Promise<Metadata> {
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    const { t } = useTranslation();
+    const { t } = useNextTranslation();
 
     return {
         title: t('metadata.title'),
@@ -28,7 +31,12 @@ export default function RootLayout({
 
     return (
         <html lang={lang}>
-            <body className={inter.className}>
+            <body
+                className={cn(
+                    'min-h-screen bg-background antialiased',
+                    inter.className
+                )}
+            >
                 <Header />
                 <Layout>{children}</Layout>
                 <Footer />
