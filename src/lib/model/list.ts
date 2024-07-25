@@ -1,9 +1,7 @@
-import { UUID } from 'crypto';
-
 import { Task } from './task';
 
 export type List = {
-    id: UUID;
+    id: string;
     createdat: Date;
     name: string;
     tasks: Task[];

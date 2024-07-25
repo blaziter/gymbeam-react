@@ -8,7 +8,7 @@ export const useApi = <
     QueryFnData = unknown,
     TData = QueryFnData,
     TError = UseQueryError,
-    QueryKey extends Record<any, any> = {},
+    QueryKey extends Record<any, any> = object,
 >(
     key: QueryKey,
     fn: QueryFn<TData>
@@ -30,11 +30,10 @@ type UpdateListBodyDto = Omit<List, 'createdAt'>;
 type DeleteListParamsDto = Pick<List, 'id'>;
 
 export class todoListApi {
-    public static getAllLists = (props: any) => {
+    public static getAllLists = () => {
         return request<FindAllListsResponseDto[]>({
             url: '/todo-list',
             method: 'GET',
-            params: props.queryKey[1],
         });
     };
 
