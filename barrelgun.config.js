@@ -10,7 +10,6 @@ const barrels = [
     {
         path: [
             'src/app/**/_components/index.ts',
-            'src/assets/index.ts',
             'src/components/index.ts',
             'src/components/**/index.ts',
         ],
