@@ -27,6 +27,14 @@
     "components.feature.TaskDialog.submit.create": "Add task",
     "components.feature.TaskDialog.tags": "Tags",
     "components.feature.TaskDialog.title": "Add new task",
+    "components.AlertDialog.todoListTable.actionColumns.delete.actionButton": "Delete list",
+    "components.AlertDialog.todoListTable.actionColumns.delete.title": "Do you really want to delete this list?",
+    "components.AlertDialog.todoListTable.actionColumns.delete.cancelLabel": "Cancel",
+    "components.AlertDialog.todoListTable.actionColumns.delete.continueLabel": "Delete list",
+    "components.AlertDialog.task.delete.title": "Do you really want to delete this task?",
+    "components.AlertDialog.task.delete.cancelLabel": "Cancel",
+    "components.AlertDialog.task.delete.continueLabel": "Delete task",
+    "components.AlertDialog.task.delete.actionButton": "Delete task",
     "metadata.title": "Case Study - React Developer",
     "metadata.description": "Entry project for GymBeam"
 }

@@ -27,6 +27,14 @@
     "components.feature.TaskDialog.submit.create": "Přidat nový úkol",
     "components.feature.TaskDialog.tags": "Štítky",
     "components.feature.TaskDialog.title": "Přidat nový úkol",
+    "components.AlertDialog.todoListTable.actionColumns.delete.actionButton": "Smazat list",
+    "components.AlertDialog.todoListTable.actionColumns.delete.title": "Opravdu si přejete smazat list?",
+    "components.AlertDialog.todoListTable.actionColumns.delete.cancelLabel": "Zrušit",
+    "components.AlertDialog.todoListTable.actionColumns.delete.continueLabel": "Smazat list",
+    "components.AlertDialog.task.delete.title": "Opravdu si přejete smazat úkol?",
+    "components.AlertDialog.task.delete.cancelLabel": "Zrušit",
+    "components.AlertDialog.task.delete.continueLabel": "Smazat úkol",
+    "components.AlertDialog.task.delete.actionButton": "Smazat úkol",
     "metadata.title": "Case Study - React Developer",
     "metadata.description": "Vstupní projekt pro GymBeam"
 }
