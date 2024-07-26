@@ -65,8 +65,8 @@ export const TaskDialog = ({
                         name: data.name,
                         priority: data.priority,
                         completed: data.completed,
-                        dueDate: new Date(data.dueDate),
-                        tags: data.tags.join(', '),
+                        dueDate: data.dueDate,
+                        tags: data.tags.length > 0 ? data.tags.join(', ') : '',
                         etc: data.etc,
                     };
                 }
@@ -76,6 +76,8 @@ export const TaskDialog = ({
                 throw new Error('Invalid mode');
         }
     }, [data, mode, setDueDate]);
+
+    console.log(defaultValues);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -168,7 +170,7 @@ export const TaskDialog = ({
                                     <FormItem>
                                         <FormLabel>{tb('name')}</FormLabel>
                                         <FormControl>
-                                            <Input required {...field} />
+                                            <Input {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
