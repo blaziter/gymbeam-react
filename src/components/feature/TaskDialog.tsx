@@ -1,8 +1,9 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { getTags, isDefined } from '@lib';
 import { cs } from 'date-fns/locale';
-import React, { Attributes } from 'react';
+import React, { Attributes, useCallback, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -19,46 +20,145 @@ import {
 } from '@components/ui/form';
 import { Input } from '@components/ui/input';
 
-import { useNextTranslation } from '@lib/hooks';
+import { todoListApi, useApi, useNextTranslation } from '@lib/hooks';
 
 type AddTaskModalProps = {
     listId?: string;
     taskId?: string;
     key?: Attributes['key'];
     mode: 'create' | 'update';
+    refetch?: () => void;
 };
 
 export const TaskDialog = ({
-    key,
     listId,
     taskId,
     mode,
+    refetch,
+    ...props
 }: AddTaskModalProps) => {
     const { tb, lang } = useNextTranslation(TaskDialog.displayName);
     const [dueDate, setDueDate] = React.useState<Date | undefined>(undefined);
+    const [open, setOpen] = React.useState(false);
+
+    const { data } = useApi(
+        [todoListApi.getTask.key, { listId, taskId }],
+        ({ queryKey }) => todoListApi.getTask.call(queryKey[1])
+    );
+
+    const defaultValues = useMemo(() => {
+        switch (mode) {
+            case 'create':
+                return {
+                    name: '',
+                    priority: '1',
+                    completed: false,
+                    dueDate: new Date(),
+                    tags: '',
+                    etc: '',
+                };
+            case 'update':
+                if (isDefined(data)) {
+                    setDueDate(data.dueDate);
+
+                    return {
+                        name: data.name,
+                        priority: data.priority,
+                        completed: data.completed,
+                        dueDate: new Date(data.dueDate),
+                        tags: data.tags.join(', '),
+                        etc: data.etc,
+                    };
+                }
+                break;
+
+            default:
+                throw new Error('Invalid mode');
+        }
+    }, [data, mode, setDueDate]);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
-        defaultValues: {
-            name: '',
-            completed: false,
-            priority: 1,
-            dueDate: undefined,
-            tags: '',
-            etc: '',
-        },
+        defaultValues,
     });
 
-    function onSubmit(values: z.infer<typeof formSchema>) {}
+    const onSubmitCallback = useCallback(
+        async (values: any) => {
+            const inputData = formSchema.parse(values);
+
+            switch (mode) {
+                case 'create':
+                    if (isDefined(listId)) {
+                        await todoListApi.createTask
+                            .call(
+                                {
+                                    listId,
+                                },
+                                {
+                                    tags: isDefined(inputData.tags)
+                                        ? getTags(inputData.tags)
+                                        : undefined,
+                                    name: inputData.name,
+                                    completed: inputData.completed,
+                                    priority: inputData.priority,
+                                    dueDate: inputData.dueDate,
+                                    etc: inputData.etc,
+                                }
+                            )
+                            .then((res) => {
+                                form.reset();
+                                if (res.status === 201) {
+                                    refetch?.();
+                                    setOpen(false);
+                                }
+                            });
+                    }
+                    break;
+                case 'update':
+                    if (isDefined(listId) && isDefined(taskId)) {
+                        await todoListApi.updateTask
+                            .call(
+                                {
+                                    listId,
+                                    taskId,
+                                },
+                                {
+                                    tags: isDefined(inputData.tags)
+                                        ? getTags(inputData.tags)
+                                        : undefined,
+                                    name: inputData.name,
+                                    completed: inputData.completed,
+                                    priority: inputData.priority,
+                                    dueDate: inputData.dueDate,
+                                    etc: inputData.etc,
+                                }
+                            )
+                            .then((res) => {
+                                form.reset();
+                                if (res.status === 200) {
+                                    refetch?.();
+                                    setOpen(false);
+                                }
+                            });
+                    }
+                    break;
+                default:
+                    throw new Error('Invalid mode');
+            }
+        },
+        [listId, mode, taskId, form, refetch]
+    );
 
     return (
         <Dialog
-            key={key}
+            key={props.key}
+            open={open}
+            onOpenChange={setOpen}
             openLabel={tb(`openLabel.${mode}`)}
-            title={tb('title')}
+            title={tb(`title.${mode}`)}
         >
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)}>
+                <form onSubmit={form.handleSubmit(onSubmitCallback)}>
                     <div className='flex gap-4'>
                         <div>
                             <FormField
@@ -86,8 +186,18 @@ export const TaskDialog = ({
                                             <FormControl>
                                                 <Input
                                                     type='checkbox'
-                                                    defaultChecked={false}
-                                                    {...field}
+                                                    checked={
+                                                        field.value || false
+                                                    }
+                                                    onChange={(e) =>
+                                                        field.onChange(
+                                                            e.target.checked
+                                                        )
+                                                    }
+                                                    onBlur={field.onBlur}
+                                                    disabled={field.disabled}
+                                                    name={field.name}
+                                                    ref={field.ref}
                                                 />
                                             </FormControl>
                                             <FormMessage />
@@ -158,8 +268,10 @@ export const TaskDialog = ({
                                         className='border border-gray-300 rounded-md max-w-fit'
                                         mode='single'
                                         selected={dueDate}
-                                        onSelect={setDueDate}
-                                        defaultValue={dueDate}
+                                        onSelect={(newDate) => {
+                                            field.onChange(newDate);
+                                            setDueDate(newDate);
+                                        }}
                                         weekStartsOn={1}
                                         locale={lang === 'cs' ? cs : undefined}
                                         {...field}
@@ -185,8 +297,8 @@ const formSchema = z.object({
         message: 'Task should have at least 2 characters.',
     }),
     completed: z.boolean().optional(),
-    priority: z.number().min(1).max(10),
-    dueDate: z.date().optional(),
+    priority: z.string().optional(),
+    dueDate: z.date(),
     tags: z.string().optional(),
     etc: z.string().optional(),
 });

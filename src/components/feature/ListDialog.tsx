@@ -1,7 +1,8 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import React, { Attributes } from 'react';
+import { isDefined } from '@lib';
+import React, { Attributes, useCallback, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -18,33 +19,92 @@ import {
 } from '@components/ui/form';
 import { Input } from '@components/ui/input';
 
-import { useNextTranslation } from '@lib/hooks';
+import { todoListApi, useApi, useNextTranslation } from '@lib/hooks';
 
 type AddListModalProps = {
     key: Attributes['key'];
     mode: 'create' | 'update';
+    taskId?: string;
+    listId?: string;
 };
 
-export const ListDialog = ({ key, mode }: AddListModalProps) => {
+export const ListDialog = ({
+    mode,
+    taskId,
+    listId,
+    ...props
+}: AddListModalProps) => {
     const { tb } = useNextTranslation(ListDialog.displayName);
+
+    const { data } = useApi(
+        [todoListApi.getOneList.key, { listId }],
+        (queryKey) => todoListApi.getOneList.call(queryKey[1])
+    );
+
+    const defaultValues = useMemo(() => {
+        switch (mode) {
+            case 'create':
+                return {
+                    name: '',
+                };
+            case 'update':
+                if (isDefined(data)) {
+                    return {
+                        name: data.name,
+                    };
+                }
+                break;
+
+            default:
+                throw new Error('Invalid mode');
+        }
+    }, [data, mode]);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
-        defaultValues: {
-            name: '',
-        },
+        defaultValues,
     });
 
-    function onSubmit(values: z.infer<typeof formSchema>) {}
+    const onSubmitCallback = useCallback(
+        async (values: any) => {
+            const inputData = formSchema.parse(values);
+
+            switch (mode) {
+                case 'create':
+                    if (isDefined(listId)) {
+                        await todoListApi.createList.call({
+                            ...inputData,
+                        });
+                    }
+                    break;
+                case 'update':
+                    if (isDefined(listId) && isDefined(taskId)) {
+                        await todoListApi.updateTask.call(
+                            {
+                                listId,
+                                taskId,
+                            },
+                            {
+                                ...inputData,
+                            }
+                        );
+                    }
+                    break;
+                default:
+                    throw new Error('Invalid mode');
+            }
+        },
+        [listId, mode, taskId]
+    );
 
     return (
         <Dialog
-            key={key}
             openLabel={tb(`openLabel.${mode}`)}
-            title={tb('title')}
+            title={tb(`title.${mode}`)}
+            {...props}
         >
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)}>
+                <form onSubmit={form.handleSubmit(onSubmitCallback)}>
                     <FormField
                         name='name'
                         control={form.control}
