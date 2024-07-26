@@ -2,8 +2,8 @@ export type Task = {
     id: string;
     name: string;
     completed: boolean;
-    priority: number;
+    priority: string;
     dueDate: Date;
-    tags: string[];
+    tags?: string[];
     etc: string;
 };
