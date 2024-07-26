@@ -1,7 +1,6 @@
 import { isDefined } from '@lib';
 import React from 'react';
 
-import { Button } from './Button';
 import {
     AlertDialogAction,
     AlertDialogCancel,
@@ -41,10 +40,8 @@ export const AlertDialog = ({
 
     return (
         <AlertDialogComponent {...props}>
-            <AlertDialogTrigger>
-                <Button Icon={Icon} variant='danger'>
-                    {tb(openLabel)}
-                </Button>
+            <AlertDialogTrigger className='bg-red-500 text-white rounded-md px-3 py-2 flex items-center gap-1'>
+                    {Icon} {tb(openLabel)}
             </AlertDialogTrigger>
             <AlertDialogContent>
                 <AlertDialogHeader>
