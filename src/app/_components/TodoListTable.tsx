@@ -4,8 +4,7 @@ import { TrashIcon } from '@radix-ui/react-icons';
 import { useRouter } from 'next/navigation';
 import { useCallback } from 'react';
 
-import { Table, TasksList } from '@components';
-import { Button } from '@components/Button';
+import { AlertDialog, Table, TasksList } from '@components';
 import { ListDialog, TaskDialog } from '@components/feature';
 
 import { todoListApi, useApi, useNextTranslation } from '@lib/hooks';
@@ -54,14 +53,15 @@ export const TodoListTable = () => {
                     mode='create'
                     refetch={refetch}
                 />,
-                <Button
-                    Icon={<TrashIcon />}
-                    variant='danger'
+                <AlertDialog
                     key='delete'
+                    Icon={<TrashIcon />}
                     onClick={() => deleteListCallback(row.id)}
-                >
-                    {tb('todoListTable.actionColumns.delete')}
-                </Button>,
+                    openLabel='todoListTable.actionColumns.delete.actionButton'
+                    title='todoListTable.actionColumns.delete.title'
+                    cancelLabel='todoListTable.actionColumns.delete.cancelLabel'
+                    continueLabel='todoListTable.actionColumns.delete.continueLabel'
+                />,
             ]}
             refetch={refetch}
         />

@@ -3,12 +3,12 @@ import { TrashIcon } from '@radix-ui/react-icons';
 import { formatISO } from 'date-fns';
 import React, { useCallback } from 'react';
 
-import { Button } from './Button';
+import { AlertDialog } from './Alert-Dialog';
 import { TaskDialog } from './feature';
 import { Input, Label } from './ui';
 import { Badge } from './ui/badge';
 
-import { todoListApi, useNextTranslation } from '@lib/hooks';
+import { todoListApi } from '@lib/hooks';
 import { Task as TaskModel } from '@lib/model';
 
 export const Task = ({
@@ -22,7 +22,6 @@ export const Task = ({
     refetch,
     taskId,
 }: TaskModel & { listId: string; taskId?: string; refetch?: () => void }) => {
-    const { tb } = useNextTranslation(Task.displayName);
     const [updateCompleted, setUpdateCompleted] = React.useState(completed);
 
     const taskCompletedCallback = useCallback(
@@ -74,13 +73,15 @@ export const Task = ({
                     mode='update'
                     refetch={refetch}
                 />
-                <Button
+                <AlertDialog
+                    key='delete'
                     Icon={<TrashIcon />}
-                    variant='danger'
                     onClick={taskDeleteCallback}
-                >
-                    {tb('delete.button')}
-                </Button>
+                    openLabel='task.delete.actionButton'
+                    title='task.delete.title'
+                    cancelLabel='task.delete.cancelLabel'
+                    continueLabel='task.delete.continueLabel'
+                />
             </div>
         </div>
     );
