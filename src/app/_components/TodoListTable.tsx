@@ -50,9 +50,11 @@ export const TodoListTable = () => {
                 <TaskDialog
                     key='add'
                     listId={row.id}
+                    taskId={row.tasks.find((task) => task)?.id}
                     mode='create'
                     refetch={refetch}
                 />,
+                <ListDialog key='update' mode='update' listId={row.id} />,
                 <AlertDialog
                     key='delete'
                     Icon={<TrashIcon />}

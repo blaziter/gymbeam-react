@@ -26,43 +26,49 @@ type AddListModalProps = {
     mode: 'create' | 'update';
     taskId?: string;
     listId?: string;
+    refetch?: () => void;
 };
 
 export const ListDialog = ({
     mode,
-    taskId,
     listId,
+    refetch,
     ...props
 }: AddListModalProps) => {
     const { tb } = useNextTranslation(ListDialog.displayName);
+    const [open, setOpen] = React.useState(false);
 
     const { data } = useApi(
         [todoListApi.getOneList.key, { listId }],
-        (queryKey) => todoListApi.getOneList.call(queryKey[1])
+        (queryKey) =>
+            todoListApi.getOneList.call(queryKey[1]).then((res) => {
+                form.reset();
+
+                return res;
+            })
     );
-
-    const defaultValues = useMemo(() => {
-        switch (mode) {
-            case 'create':
-                return {
-                    name: '',
-                };
-            case 'update':
-                if (isDefined(data)) {
-                    return {
-                        name: data.name,
-                    };
-                }
-                break;
-
-            default:
-                throw new Error('Invalid mode');
-        }
-    }, [data, mode]);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
-        defaultValues,
+        defaultValues: useMemo(() => {
+            switch (mode) {
+                case 'create':
+                    return {
+                        name: '',
+                    };
+
+                case 'update':
+                    if (isDefined(data)) {
+                        return {
+                            name: data.name,
+                        };
+                    }
+                    break;
+
+                default:
+                    throw new Error('Invalid mode');
+            }
+        }, [data, mode]),
     });
 
     const onSubmitCallback = useCallback(
@@ -71,34 +77,51 @@ export const ListDialog = ({
 
             switch (mode) {
                 case 'create':
-                    if (isDefined(listId)) {
-                        await todoListApi.createList.call({
+                    await todoListApi.createList
+                        .call({
                             ...inputData,
+                        })
+                        .then((res) => {
+                            form.reset();
+
+                            if (res.status === 201) {
+                                refetch?.();
+                                setOpen(false);
+                            }
                         });
-                    }
                     break;
                 case 'update':
-                    if (isDefined(listId) && isDefined(taskId)) {
-                        await todoListApi.updateTask.call(
-                            {
-                                listId,
-                                taskId,
-                            },
-                            {
-                                ...inputData,
-                            }
-                        );
+                    if (isDefined(listId)) {
+                        await todoListApi.updateList
+                            .call(
+                                {
+                                    listId,
+                                },
+                                {
+                                    ...inputData,
+                                }
+                            )
+                            .then((res) => {
+                                form.reset();
+                                refetch?.();
+
+                                if (res.status === 200) {
+                                    setOpen(false);
+                                }
+                            });
                     }
                     break;
                 default:
                     throw new Error('Invalid mode');
             }
         },
-        [listId, mode, taskId]
+        [listId, mode, form, refetch]
     );
 
     return (
         <Dialog
+            open={open}
+            onOpenChange={setOpen}
             openLabel={tb(`openLabel.${mode}`)}
             title={tb(`title.${mode}`)}
             {...props}

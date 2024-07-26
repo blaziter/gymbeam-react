@@ -43,7 +43,12 @@ export const TaskDialog = ({
 
     const { data } = useApi(
         [todoListApi.getTask.key, { listId, taskId }],
-        ({ queryKey }) => todoListApi.getTask.call(queryKey[1])
+        ({ queryKey }) =>
+            todoListApi.getTask.call(queryKey[1]).then((res) => {
+                form.reset();
+
+                return res;
+            })
     );
 
     const defaultValues = useMemo(() => {
@@ -77,8 +82,6 @@ export const TaskDialog = ({
         }
     }, [data, mode, setDueDate]);
 
-    console.log(defaultValues);
-
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues,
@@ -109,6 +112,7 @@ export const TaskDialog = ({
                             )
                             .then((res) => {
                                 form.reset();
+
                                 if (res.status === 201) {
                                     refetch?.();
                                     setOpen(false);
@@ -137,6 +141,7 @@ export const TaskDialog = ({
                             )
                             .then((res) => {
                                 form.reset();
+
                                 if (res.status === 200) {
                                     refetch?.();
                                     setOpen(false);
@@ -247,7 +252,6 @@ export const TaskDialog = ({
                                         <FormControl>
                                             <Input
                                                 type='number'
-                                                defaultValue={1}
                                                 min={1}
                                                 max={10}
                                                 {...field}

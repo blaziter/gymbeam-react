@@ -1,7 +1,9 @@
+'use client';
+
 import { isDefined } from '@lib';
 import { TrashIcon } from '@radix-ui/react-icons';
 import { formatISO } from 'date-fns';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 
 import { AlertDialog } from './Alert-Dialog';
 import { TaskDialog } from './feature';
@@ -22,7 +24,9 @@ export const Task = ({
     refetch,
     taskId,
 }: TaskModel & { listId: string; taskId?: string; refetch?: () => void }) => {
-    const [updateCompleted, setUpdateCompleted] = React.useState(completed);
+    const [updateCompleted, setUpdateCompleted] = React.useState<
+        boolean | undefined
+    >(completed);
 
     const taskCompletedCallback = useCallback(
         (e: React.MouseEvent<HTMLInputElement, MouseEvent>) => {
@@ -46,6 +50,10 @@ export const Task = ({
         }
     }, [listId, taskId, refetch]);
 
+    useEffect(() => {
+        setUpdateCompleted(completed);
+    }, [completed]);
+
     return (
         <div
             className={`grid grid-cols-6 items-center gap-2 p-2 border-b last:border-0 border-gray-200 ${updateCompleted ? 'bg-[#9ACD32]/25' : ''}`}
@@ -54,7 +62,7 @@ export const Task = ({
             <div className='grid grid-cols-2 items-center'>
                 <Input
                     type='checkbox'
-                    defaultChecked={completed}
+                    checked={updateCompleted}
                     onClick={(e) => taskCompletedCallback(e)}
                 />
                 <Label>{name}</Label>
