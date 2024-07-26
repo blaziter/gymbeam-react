@@ -14,7 +14,7 @@ import { useNextTranslation } from '@lib/hooks';
 
 type TableProps<T> = {
     data: Array<T> | undefined;
-    actionColumns?: Array<React.ReactNode>;
+    actionColumns?: (row: T) => Array<React.ReactNode> | React.ReactNode;
     paginationPerPage?: number;
     rowDetail?: (row: T) => void | (() => void);
     refetch?: () => void;
@@ -29,6 +29,7 @@ export const Table = <T,>({
     expandableRowsComponent,
     refetch,
     title,
+    actions,
     ...props
 }: TableProps<T>) => {
     const { tb } = useNextTranslation(Table.displayName);
@@ -47,17 +48,22 @@ export const Table = <T,>({
             <DataTable<T>
                 title={<div className='text-base'>{title}</div>}
                 actions={
-                    isDefined(refetch) ? (
-                        <Button
-                            className='text-sm'
-                            key='refresh'
-                            onClick={refetch}
-                            variant='primary'
-                            Icon={<ReloadIcon />}
-                        >
-                            {tb('refresh')}
-                        </Button>
-                    ) : undefined
+                    <div className='flex gap-1 text-sm'>
+                        {[
+                            actions,
+                            isDefined(refetch) ? (
+                                <Button
+                                    className='text-sm'
+                                    key='refresh'
+                                    onClick={refetch}
+                                    variant='primary'
+                                    Icon={<ReloadIcon />}
+                                >
+                                    {tb('refresh')}
+                                </Button>
+                            ) : undefined,
+                        ]}
+                    </div>
                 }
                 data={isDefined(data) ? data : []}
                 columns={[
@@ -66,7 +72,9 @@ export const Table = <T,>({
                         name: tb('actions'),
                         cell: (row) => (
                             <div className='flex gap-2 min-w-max'>
-                                {isDefined(actionColumns) && actionColumns}
+                                {isDefined(actionColumns)
+                                    ? actionColumns(row)
+                                    : undefined}
                                 <Button
                                     variant='tertiary'
                                     className='flex'
