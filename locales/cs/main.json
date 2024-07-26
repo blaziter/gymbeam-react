@@ -35,6 +35,7 @@
     "components.AlertDialog.task.delete.cancelLabel": "Zrušit",
     "components.AlertDialog.task.delete.continueLabel": "Smazat úkol",
     "components.AlertDialog.task.delete.actionButton": "Smazat úkol",
+    "components.feature.ListDialog.title.update": "Upravit list",
     "metadata.title": "Case Study - React Developer",
     "metadata.description": "Vstupní projekt pro GymBeam"
 }

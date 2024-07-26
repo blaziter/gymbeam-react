@@ -35,6 +35,7 @@
     "components.AlertDialog.task.delete.cancelLabel": "Cancel",
     "components.AlertDialog.task.delete.continueLabel": "Delete task",
     "components.AlertDialog.task.delete.actionButton": "Delete task",
+    "components.feature.ListDialog.title.update": "Edit list",
     "metadata.title": "Case Study - React Developer",
     "metadata.description": "Entry project for GymBeam"
 }
