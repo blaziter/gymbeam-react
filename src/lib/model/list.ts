@@ -5,5 +5,4 @@ export type List = {
     createdat: Date;
     name: string;
     tasks: Task[];
-    color: string;
 };
