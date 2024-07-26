@@ -1,3 +1,5 @@
+'use client';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import { cs } from 'date-fns/locale';
 import React, { Attributes } from 'react';
