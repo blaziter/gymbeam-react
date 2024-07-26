@@ -1,3 +1,4 @@
+import { DialogProps as DialogComponentProps } from '@radix-ui/react-dialog';
 import React, { Attributes } from 'react';
 
 import { Button } from '@components';
@@ -16,7 +17,7 @@ type DialogProps = {
     title: string;
     description?: string;
     children: React.ReactNode;
-};
+} & DialogComponentProps;
 
 export const Dialog = ({
     key,
@@ -24,9 +25,10 @@ export const Dialog = ({
     title,
     description,
     children,
+    ...props
 }: DialogProps) => {
     return (
-        <DialogComponent key={key}>
+        <DialogComponent key={key} {...props}>
             <DialogTrigger asChild>
                 <Button variant='outline'>{openLabel}</Button>
             </DialogTrigger>
